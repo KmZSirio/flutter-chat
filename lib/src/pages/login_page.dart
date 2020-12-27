@@ -9,6 +9,13 @@ import 'package:realtime_chat/src/widgets/custom_labels.dart';
 import 'package:realtime_chat/src/widgets/custom_logo.dart';
 
 class LoginPage extends StatelessWidget {
+
+  final String authError;
+
+  const LoginPage({
+    this.authError = ""
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,6 +30,7 @@ class LoginPage extends StatelessWidget {
               children: [
 
                 Logo(img: AssetImage("assets/tag-logo.png"), text: "Messenger"),
+                Text( authError, style: TextStyle(color: Colors.red[400], fontSize: 15, fontWeight: FontWeight.w400) ),
                 _Form(),
                 Labels(text1: "¿No tienes cuenta?", text2: "Crea una ahora!", route: "register"),
                 Text("Terminos y condiciones de uso", style: TextStyle(fontWeight: FontWeight.w200))
@@ -83,6 +91,10 @@ class __FormState extends State<_Form> {
                 if ( loginOk == "ok" ) {
                   // TODO: Conectar a nuestro socket server
                   Navigator.pushReplacementNamed(context, "users");
+                } else if ( loginOk == "sv" ) {
+                  showAlert(context, "Error", "Conexion fallida, intente mas tarde");
+                  emailCtrl.clear();
+                  passCtrl.clear();
                 } else {
                   showAlert(context, "Error", loginOk);
                 }

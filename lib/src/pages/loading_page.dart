@@ -25,7 +25,7 @@ class LoadingPage extends StatelessWidget {
 
     final authenticated = await authService.isLoggedIn();
 
-    if ( authenticated ) {
+    if ( authenticated == "true" ) {
       // TODO: Conectar al socket sv
       Navigator.pushReplacement(
         context, 
@@ -35,11 +35,19 @@ class LoadingPage extends StatelessWidget {
         )
       );
       
-    } else {
+    } else if ( authenticated == "false" ) {
       Navigator.pushReplacement(
         context, 
         PageRouteBuilder(
           pageBuilder: ( _, __, ___ ) => LoginPage(),
+          transitionDuration: Duration( milliseconds: 0 )
+        )
+      );
+    } else {
+      Navigator.pushReplacement(
+        context, 
+        PageRouteBuilder(
+          pageBuilder: ( _, __, ___ ) => LoginPage( authError: authenticated ),
           transitionDuration: Duration( milliseconds: 0 )
         )
       );

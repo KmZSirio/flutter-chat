@@ -44,24 +44,32 @@ class AuthService with ChangeNotifier {
       "password": password
     };
 
-    final resp = await http.post( "${ Environment.apiUrl }/login",
-      body: jsonEncode(data),
-      headers: { "Content-Type": "application/json" }
-    );
+    try{
 
-    this.authenticating = false;
-    if ( resp.statusCode == 200 ) {
-      final loginResponse = loginResponseFromJson( resp.body );
-      this.user = loginResponse.user;
+      final resp = await http.post( "${ Environment.apiUrl }/login",
+        body: jsonEncode(data),
+        headers: { "Content-Type": "application/json" }
+      );
 
-      // Guardar token en lugar seguro
-      await this._saveToken( loginResponse.token );
+      this.authenticating = false;
+      if ( resp.statusCode == 200 ) {
+        final loginResponse = loginResponseFromJson( resp.body );
+        this.user = loginResponse.user;
 
-      return  "ok";
-    } else {
-      final errorResponse = errorResponseFromJson( resp.body );
-      return errorResponse.msg;
+        // Guardar token en lugar seguro
+        await this._saveToken( loginResponse.token );
+
+        return  "ok";
+      } else {
+        final errorResponse = errorResponseFromJson( resp.body );
+        return errorResponse.msg;
+      }
+
+    } catch (e) {
+      // print(e);
+      return "sv";
     }
+      
   }
 
   Future<String> register( String name, String email, String password ) async {
@@ -74,49 +82,66 @@ class AuthService with ChangeNotifier {
       "password": password
     };
 
-    final resp = await http.post( "${ Environment.apiUrl }/login/new",
-      body: jsonEncode(data),
-      headers: { "Content-Type": "application/json" }
-    );
+    try{
 
-    this.authenticating = false;
-    if ( resp.statusCode == 200 ) {
-      final loginResponse = loginResponseFromJson( resp.body );
-      this.user = loginResponse.user;
+      final resp = await http.post( "${ Environment.apiUrl }/login/new",
+        body: jsonEncode(data),
+        headers: { "Content-Type": "application/json" }
+      );
 
-      // Guardar token en lugar seguro
-      await this._saveToken( loginResponse.token );
+      this.authenticating = false;
+      if ( resp.statusCode == 200 ) {
+        final loginResponse = loginResponseFromJson( resp.body );
+        this.user = loginResponse.user;
 
-      return "ok";
-    } else {
-      final errorResponse = errorResponseFromJson( resp.body );
-      return errorResponse.msg;
+        // Guardar token en lugar seguro
+        await this._saveToken( loginResponse.token );
+
+        return "ok";
+      } else {
+        final errorResponse = errorResponseFromJson( resp.body );
+        return errorResponse.msg;
+      }
+
+    } catch (e) {
+      // print(e);
+      return "sv";
     }
+
   }
 
-  Future<bool> isLoggedIn() async {
+  Future<String> isLoggedIn() async {
 
     final token = await this._storage.read(key: "token");
     
-    final resp = await http.get( "${ Environment.apiUrl }/login/renew",
-      headers: { 
-        "Content-Type": "application/json",
-        "x-token": token
+
+    try{
+
+      final resp = await http.get( "${ Environment.apiUrl }/login/renew",
+        headers: { 
+          "Content-Type": "application/json",
+          "x-token": token
+        }
+      );
+
+      if ( resp.statusCode == 200 ) {
+        final loginResponse = loginResponseFromJson( resp.body );
+        this.user = loginResponse.user;
+
+        // Guardar token en lugar seguro
+        await this._saveToken( loginResponse.token );
+
+        return "true";
+      } else {
+        this.logout();
+        return "false";
       }
-    );
 
-    if ( resp.statusCode == 200 ) {
-      final loginResponse = loginResponseFromJson( resp.body );
-      this.user = loginResponse.user;
-
-      // Guardar token en lugar seguro
-      await this._saveToken( loginResponse.token );
-
-      return true;
-    } else {
-      this.logout();
-      return false;
+    } catch (e) {
+      // print(e);
+      return "Conexion fallida, intente de nuevo";
     }
+
   }
 
   Future _saveToken( String token ) async {

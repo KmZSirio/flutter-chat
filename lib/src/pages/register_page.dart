@@ -91,6 +91,11 @@ class __FormState extends State<_Form> {
                 if ( registerOk == "ok" ) {
                   // TODO: Conectar a nuestro socket server
                   Navigator.pushReplacementNamed(context, "users");
+                } else if ( registerOk == "sv" ) {
+                  showAlert(context, "Error", "Conexion fallida, intente mas tarde");
+                  nameCtrl.clear();
+                  emailCtrl.clear();
+                  passCtrl.clear();
                 } else {
                   showAlert(context, "Error", registerOk);
                 }
