@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:realtime_chat/src/models/user.dart';
+import 'package:realtime_chat/src/services/auth_service.dart';
 
 class UsersPage extends StatefulWidget {
 
@@ -14,23 +16,32 @@ class _UsersPageState extends State<UsersPage> {
   RefreshController _refreshController = RefreshController( initialRefresh: false );
 
   final List users = [
-    User( uid: "1", nombre: "Pedro", email: "iron@gmail.com", online: true ),
-    User( uid: "2", nombre: "Juan", email: "jesta@gmail.com", online: false ),
-    User( uid: "3", nombre: "Luis", email: "lemon@gmail.com", online: true ),
-    User( uid: "4", nombre: "Jose", email: "commander@gmail.com", online: true ),
+    User( uid: "1", name: "Pedro", email: "iron@gmail.com", online: true ),
+    User( uid: "2", name: "Juan", email: "jesta@gmail.com", online: false ),
+    User( uid: "3", name: "Luis", email: "lemon@gmail.com", online: true ),
+    User( uid: "4", name: "Jose", email: "commander@gmail.com", online: true ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
 
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.user;
+
+    return Scaffold(
       appBar: AppBar(
-        title: Text("Mi nombre", style: TextStyle(color: Colors.black87),),
+        title: Text( user.name, style: TextStyle(color: Colors.black87) ),
         elevation: 1,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: Icon( FontAwesomeIcons.signOutAlt, color: Colors.blue, ),
-          onPressed: () {},
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onPressed: () {
+            //TODO: Desconectar el socket
+            Navigator.pushReplacementNamed(context, "login");
+            AuthService.deleteToken();
+          },
         ),
         actions: [
           Container(
@@ -57,7 +68,10 @@ class _UsersPageState extends State<UsersPage> {
   ListView _listViewUsers() {
     return ListView.separated(
       physics: BouncingScrollPhysics(),
-      itemBuilder: (_ , i) => _userListTile( users[i] ), 
+      itemBuilder: (_ , i) => GestureDetector(
+        child: _userListTile( users[i] ),
+        onTap: () => Navigator.pushNamed(context, "chat"),
+      ), 
       separatorBuilder: (_ , i) => Divider(),
       itemCount: users.length
     );
@@ -65,13 +79,13 @@ class _UsersPageState extends State<UsersPage> {
 
   ListTile _userListTile( User user ) {
     return ListTile(
-        title: Text( user.nombre ),
+        title: Text( user.name ),
         subtitle: Text( user.email ),
         trailing: ( user.online )
                   ? Icon( FontAwesomeIcons.signal, color: Colors.green[300], size: 20 )
                   : Icon( FontAwesomeIcons.signal, color: Colors.red[300], size: 20 ),
         leading: CircleAvatar(
-          child: Text( user.nombre.substring(0,2) ),
+          child: Text( user.name.substring(0,2) ),
         ),
       );
   }
@@ -84,4 +98,5 @@ class _UsersPageState extends State<UsersPage> {
     _refreshController.refreshCompleted();
     
   }
+
 }

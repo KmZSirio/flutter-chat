@@ -137,7 +137,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     _textCtrl.clear();
     _focusNode.requestFocus();
 
-    if ( text.length == 0 ) {
+    if ( text.length > 0 ) {
       final _newMessage = new ChatMessage( 
             uid: "123", 
             text: text,

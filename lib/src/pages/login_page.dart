@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:realtime_chat/src/helpers/show_alert.dart';
+import 'package:realtime_chat/src/services/auth_service.dart';
 import 'package:realtime_chat/src/widgets/custom_blue_button.dart';
 import 'package:realtime_chat/src/widgets/custom_input.dart';
 import 'package:realtime_chat/src/widgets/custom_labels.dart';
@@ -46,6 +49,9 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>( context );
+
     return Container(
       margin: EdgeInsets.symmetric( horizontal: 30 ),
       child: Column(
@@ -67,9 +73,23 @@ class __FormState extends State<_Form> {
           ),
           CustomBlueButton(
             text: "OK",
-            onPressed: () {
-              print(emailCtrl.text);
-              print(passCtrl.text);
+            onPressed: authService.authenticating ? null : () async {
+
+              if ( emailCtrl.text.isNotEmpty && passCtrl.text.isNotEmpty ) {
+
+                FocusScope.of(context).unfocus();
+                final loginOk = await authService.login( emailCtrl.text.trim(), passCtrl.text.trim() );
+
+                if ( loginOk == "ok" ) {
+                  // TODO: Conectar a nuestro socket server
+                  Navigator.pushReplacementNamed(context, "users");
+                } else {
+                  showAlert(context, "Error", loginOk);
+                }
+
+              } else {
+                showAlert(context, "Error", "Llene todos los campos!!");
+              }                     
             },
           ),
 

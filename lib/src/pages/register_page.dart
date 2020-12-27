@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:realtime_chat/src/services/auth_service.dart';
+import 'package:realtime_chat/src/helpers/show_alert.dart';
 import 'package:realtime_chat/src/widgets/custom_blue_button.dart';
 import 'package:realtime_chat/src/widgets/custom_input.dart';
 import 'package:realtime_chat/src/widgets/custom_labels.dart';
@@ -19,7 +22,7 @@ class RegisterPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
 
-                Logo(img: AssetImage("assets/tag-logo.png"), text: "Register"),
+                Logo(img: AssetImage("assets/tag-logo.png"), text: "Register account"),
                 _Form(),
                 Labels(text1: "Ya tienes cuenta?", text2: "Ingresa ahora!", route: "login"),
                 Text("Terminos y condiciones de uso", style: TextStyle(fontWeight: FontWeight.w200))
@@ -47,6 +50,9 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>( context );
+
     return Container(
       margin: EdgeInsets.symmetric( horizontal: 30 ),
       child: Column(
@@ -75,9 +81,23 @@ class __FormState extends State<_Form> {
           ),
           CustomBlueButton(
             text: "OK",
-            onPressed: () {
-              print(emailCtrl.text);
-              print(passCtrl.text);
+            onPressed: authService.authenticating ? null : () async {
+              
+              if ( nameCtrl.text.isNotEmpty && emailCtrl.text.isNotEmpty && passCtrl.text.isNotEmpty ) {
+              
+                FocusScope.of(context).unfocus();
+                final registerOk = await authService.register( nameCtrl.text.trim(), emailCtrl.text.trim(), passCtrl.text.trim() );
+
+                if ( registerOk == "ok" ) {
+                  // TODO: Conectar a nuestro socket server
+                  Navigator.pushReplacementNamed(context, "users");
+                } else {
+                  showAlert(context, "Error", registerOk);
+                }
+
+              } else {
+                showAlert(context, "Error", "Llene todos los campos!!");
+              }
             },
           ),
 

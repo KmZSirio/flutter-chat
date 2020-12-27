@@ -20,7 +20,7 @@ class Logo extends StatelessWidget {
 
             Image(image: this.img),
             SizedBox(height: 20),
-            Text( this.text, style: TextStyle(fontSize: 30) )
+            Text( this.text, style: TextStyle(fontSize: 30), textAlign: TextAlign.center, )
 
           ],
         ),
