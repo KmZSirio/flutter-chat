@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import 'package:realtime_chat/src/models/user.dart';
 import 'package:realtime_chat/src/services/auth_service.dart';
+import 'package:realtime_chat/src/services/socket_service.dart';
+import 'package:realtime_chat/src/services/users_service.dart';
 
 class UsersPage extends StatefulWidget {
 
@@ -13,19 +17,29 @@ class UsersPage extends StatefulWidget {
 
 class _UsersPageState extends State<UsersPage> {
 
+  final usersService = new UsersService();
   RefreshController _refreshController = RefreshController( initialRefresh: false );
 
-  final List users = [
-    User( uid: "1", name: "Pedro", email: "iron@gmail.com", online: true ),
-    User( uid: "2", name: "Juan", email: "jesta@gmail.com", online: false ),
-    User( uid: "3", name: "Luis", email: "lemon@gmail.com", online: true ),
-    User( uid: "4", name: "Jose", email: "commander@gmail.com", online: true ),
-  ];
+  List<User> users = [];
+
+  // final List users = [
+  //   User( uid: "1", name: "Iron", email: "iron@gmail.com", online: true ),
+  //   User( uid: "2", name: "Jesta", email: "jesta@gmail.com", online: false ),
+  //   User( uid: "3", name: "Lemon", email: "lemon@gmail.com", online: true ),
+  //   User( uid: "4", name: "Commander", email: "commander@gmail.com", online: true ),
+  // ];
+
+  @override
+  void initState() {
+    _cargarUsuarios();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>( context );
     final user = authService.user;
 
     return Scaffold(
@@ -38,7 +52,7 @@ class _UsersPageState extends State<UsersPage> {
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
           onPressed: () {
-            //TODO: Desconectar el socket
+            socketService.disconnect();
             Navigator.pushReplacementNamed(context, "login");
             AuthService.deleteToken();
           },
@@ -46,8 +60,9 @@ class _UsersPageState extends State<UsersPage> {
         actions: [
           Container(
             margin: EdgeInsets.only(right: 10),
-            // child: Icon( FontAwesomeIcons.solidCheckCircle, color: Colors.green[300] ),
-            // child: Icon( FontAwesomeIcons.solidTimesCircle, color: Colors.red[300] ),
+            child: ( socketService.serverStatus == ServerStatus.Online )
+              ? Icon( FontAwesomeIcons.solidCheckCircle, color: Colors.green[300], size: 20 )
+              : Icon( FontAwesomeIcons.solidTimesCircle, color: Colors.red[300], size: 20 )
           )
         ],
       ),
@@ -70,7 +85,9 @@ class _UsersPageState extends State<UsersPage> {
       physics: BouncingScrollPhysics(),
       itemBuilder: (_ , i) => GestureDetector(
         child: _userListTile( users[i] ),
-        onTap: () => Navigator.pushNamed(context, "chat"),
+        onTap: () => {
+          Navigator.pushNamed(context, "chat")
+        },
       ), 
       separatorBuilder: (_ , i) => Divider(),
       itemCount: users.length
@@ -85,6 +102,7 @@ class _UsersPageState extends State<UsersPage> {
                   ? Icon( FontAwesomeIcons.signal, color: Colors.green[300], size: 20 )
                   : Icon( FontAwesomeIcons.signal, color: Colors.red[300], size: 20 ),
         leading: CircleAvatar(
+          backgroundColor: Colors.lightBlue[200],
           child: Text( user.name.substring(0,2) ),
         ),
       );
@@ -92,11 +110,11 @@ class _UsersPageState extends State<UsersPage> {
 
   _cargarUsuarios() async {
 
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+    this.users = await usersService.getUsers();
+    setState(() {});
+
+    // await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
-    
   }
-
 }

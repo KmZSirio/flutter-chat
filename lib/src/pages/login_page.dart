@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+
 import 'package:realtime_chat/src/helpers/show_alert.dart';
 import 'package:realtime_chat/src/services/auth_service.dart';
+import 'package:realtime_chat/src/services/socket_service.dart';
 import 'package:realtime_chat/src/widgets/custom_blue_button.dart';
 import 'package:realtime_chat/src/widgets/custom_input.dart';
 import 'package:realtime_chat/src/widgets/custom_labels.dart';
@@ -59,6 +62,7 @@ class __FormState extends State<_Form> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>( context );
+    final socketService = Provider.of<SocketService>( context );
 
     return Container(
       margin: EdgeInsets.symmetric( horizontal: 30 ),
@@ -89,7 +93,7 @@ class __FormState extends State<_Form> {
                 final loginOk = await authService.login( emailCtrl.text.trim(), passCtrl.text.trim() );
 
                 if ( loginOk == "ok" ) {
-                  // TODO: Conectar a nuestro socket server
+                  socketService.connect();
                   Navigator.pushReplacementNamed(context, "users");
                 } else if ( loginOk == "sv" ) {
                   showAlert(context, "Error", "Conexion fallida, intente mas tarde");

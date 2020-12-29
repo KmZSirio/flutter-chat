@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+
 import 'package:realtime_chat/src/services/auth_service.dart';
 import 'package:realtime_chat/src/helpers/show_alert.dart';
+import 'package:realtime_chat/src/services/socket_service.dart';
 import 'package:realtime_chat/src/widgets/custom_blue_button.dart';
 import 'package:realtime_chat/src/widgets/custom_input.dart';
 import 'package:realtime_chat/src/widgets/custom_labels.dart';
@@ -52,6 +55,7 @@ class __FormState extends State<_Form> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>( context );
+    final socketService = Provider.of<SocketService>( context );
 
     return Container(
       margin: EdgeInsets.symmetric( horizontal: 30 ),
@@ -83,13 +87,14 @@ class __FormState extends State<_Form> {
             text: "OK",
             onPressed: authService.authenticating ? null : () async {
               
+              // TODO: Error al enviar email incorrectamente
               if ( nameCtrl.text.isNotEmpty && emailCtrl.text.isNotEmpty && passCtrl.text.isNotEmpty ) {
               
                 FocusScope.of(context).unfocus();
                 final registerOk = await authService.register( nameCtrl.text.trim(), emailCtrl.text.trim(), passCtrl.text.trim() );
 
                 if ( registerOk == "ok" ) {
-                  // TODO: Conectar a nuestro socket server
+                  socketService.connect();
                   Navigator.pushReplacementNamed(context, "users");
                 } else if ( registerOk == "sv" ) {
                   showAlert(context, "Error", "Conexion fallida, intente mas tarde");
