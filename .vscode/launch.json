@@ -4,16 +4,24 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+
         {
             "name": "realtime_chat",
             "request": "launch",
             "type": "dart"
         },
         {
-          "name": "Celular",
+          "name": "Xiaomi",
           "request": "launch",
           "type": "dart",
           "deviceId": "2bda065"
+        },
+        {
+          "name": "Motorola",
+          "request": "launch",
+          "type": "dart",
+          "deviceId": "ZY223PMQ64"
         },
         {
           "name": "Tablet",
@@ -25,7 +33,7 @@
       "compounds": [
         {
           "name": "All Devices",
-          "configurations": ["Celular", "Tablet"]
+          "configurations": ["Xiaomi","Motorola","Tablet"]
         }
     ]
 }

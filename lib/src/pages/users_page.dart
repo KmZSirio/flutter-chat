@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -5,7 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:realtime_chat/src/models/user.dart';
+import 'package:realtime_chat/src/pages/chat_page.dart';
 import 'package:realtime_chat/src/services/auth_service.dart';
+import 'package:realtime_chat/src/services/chat_service.dart';
 import 'package:realtime_chat/src/services/socket_service.dart';
 import 'package:realtime_chat/src/services/users_service.dart';
 
@@ -84,10 +87,7 @@ class _UsersPageState extends State<UsersPage> {
     return ListView.separated(
       physics: BouncingScrollPhysics(),
       itemBuilder: (_ , i) => GestureDetector(
-        child: _userListTile( users[i] ),
-        onTap: () => {
-          Navigator.pushNamed(context, "chat")
-        },
+        child: _userListTile( users[i] )
       ), 
       separatorBuilder: (_ , i) => Divider(),
       itemCount: users.length
@@ -99,12 +99,19 @@ class _UsersPageState extends State<UsersPage> {
         title: Text( user.name ),
         subtitle: Text( user.email ),
         trailing: ( user.online )
-                  ? Icon( FontAwesomeIcons.signal, color: Colors.green[300], size: 20 )
-                  : Icon( FontAwesomeIcons.signal, color: Colors.red[300], size: 20 ),
+                  ? Container( width: 10, height: 10, decoration: BoxDecoration( shape: BoxShape.circle, color: Colors.green[300] ) )
+                  : Container( width: 10, height: 10, decoration: BoxDecoration( shape: BoxShape.circle, color: Colors.red[300] ) ),
         leading: CircleAvatar(
           backgroundColor: Colors.lightBlue[200],
           child: Text( user.name.substring(0,2) ),
         ),
+        onTap: () {
+
+          final chatService = Provider.of<ChatService>( context, listen: false );
+          chatService.targetUser = user;
+          Navigator.pushNamed(context, "chat");
+                  
+        }
       );
   }
 
